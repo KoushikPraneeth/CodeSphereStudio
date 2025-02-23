@@ -1,13 +1,13 @@
 package com.codesphere.model;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Builder;
 
 @Data
-@AllArgsConstructor
+@Builder
 public class ExecutionResult {
     private String output;
-    private String status;
+    private String error;
     private int exitCode;
     private long executionTime;
 }

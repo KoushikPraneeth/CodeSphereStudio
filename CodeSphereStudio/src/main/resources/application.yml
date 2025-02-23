@@ -18,7 +18,7 @@ security:
 
 ai:
   groq:
-    api-key: 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
+    api-key: ${GROQ_API_KEY}
     api-url: https://api.groq.com/openai/v1/chat/completions
 
 code-execution:

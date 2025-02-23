@@ -99,4 +99,18 @@ public class CodeExecutionService {
             }
         }
     }
+
+    private static class LogContainerResultCallback 
+        extends com.github.dockerjava.api.async.ResultCallback.Adapter<Frame> {
+        private final StringBuilder log = new StringBuilder();
+
+        @Override
+        public void onNext(Frame frame) {
+            log.append(new String(frame.getPayload()));
+        }
+
+        public String getLog() {
+            return log.toString();
+        }
+    }
 }

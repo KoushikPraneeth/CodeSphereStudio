@@ -1,21 +1,17 @@
 package com.codesphere.model;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.Data;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
-@Getter
-@RequiredArgsConstructor
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class LanguageConfig {
-    private final String image;
-    private final String command;
-    private final String executeFlag;
-    private final String workingDir;
-
-    public LanguageConfig(String image, String command, String executeFlag) {
-        this(image, command, executeFlag, "/tmp");
-    }
-
-    public String[] buildCommand(String code) {
-        return new String[]{command, executeFlag, code};
-    }
+    private String image;
+    private String command;
+    private String fileExtension;
+    private String compileCommand;
 }

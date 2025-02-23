@@ -1,23 +1,21 @@
 package com.codesphere.model;
 
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import java.time.LocalDateTime;
+import lombok.Builder;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Builder
 public class CollaborationMessage {
+    private String sessionId;
     private String username;
-    private String content;
     private String type;
-    private LocalDateTime timestamp;
+    private String content;
+    private Position position;
+}
 
-    public CollaborationMessage(String username, String content) {
-        this.username = username;
-        this.content = content;
-        this.type = "CODE_CHANGE";
-        this.timestamp = LocalDateTime.now();
-    }
+@Data
+@Builder
+class Position {
+    private int line;
+    private int column;
 }

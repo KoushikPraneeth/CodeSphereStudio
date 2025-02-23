@@ -10,9 +10,21 @@ services:
       - DB_USERNAME=${DB_USERNAME}
       - DB_PASSWORD=${DB_PASSWORD}
       - JWT_SECRET=${JWT_SECRET}
-      - AI_API_KEY=${AI_API_KEY}
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/codesphere
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+    restart: unless-stopped
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     networks:
       - codesphere-network
 
@@ -20,6 +32,11 @@ services:
     build: ./frontend
     ports:
       - "80:80"
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    restart: unless-stopped
     depends_on:
       - backend
     networks:
@@ -33,6 +50,11 @@ services:
       - POSTGRES_PASSWORD=${DB_PASSWORD}
     volumes:
       - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - codesphere-network
 
