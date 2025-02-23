@@ -1,0 +1,28 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/codesphere
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+server:
+  port: 8080
+
+security:
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration: 86400000
+
+ai:
+  groq:
+    api-key: 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
+    api-url: https://api.groq.com/openai/v1/chat/completions
+
+code-execution:
+  docker:
+    enabled: true
+    timeout: 30000
+    max-memory: 512m
