@@ -1,6 +1,6 @@
-import { FileExplorer } from './FileExplorer'
-import { CodeEditor } from './CodeEditor'
-import { ChatPanel } from './ChatPanel'
+import { FileExplorer } from "./FileExplorer";
+import { CodeEditor } from "./CodeEditor";
+import { ChatPanel } from "./ChatPanel";
 
 export function Layout() {
   return (
@@ -13,5 +13,5 @@ export function Layout() {
         <ChatPanel className="w-80 border-l" />
       </div>
     </div>
-  )
+  );
 }

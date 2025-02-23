@@ -19,7 +19,13 @@ public class CodeExecutionController {
     
     @PostMapping("/execute")
     public ResponseEntity<CodeExecutionResponse> executeCode(@RequestBody CodeExecutionRequest request) {
-        CodeExecutionResponse result = codeExecutionService.executeCode(request);
-        return ResponseEntity.ok(result);
+        var result = codeExecutionService.executeCode(request);
+        CodeExecutionResponse response = CodeExecutionResponse.builder()
+            .output(result.getOutput())
+            .error(result.getError())
+            .executionTime(result.getExecutionTime())
+            .status(result.getExitCode() == 0 ? "SUCCESS" : "ERROR")
+            .build();
+        return ResponseEntity.ok(response);
     }
 }

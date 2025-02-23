@@ -27,7 +27,6 @@ public class AICodeService {
     private String apiUrl;
 
     public Flux<String> convertCode(String sourceCode, String sourceLanguage, String targetLanguage) {
-        // Check cache first
         String cachedResult = cacheService.getConversion(sourceCode, sourceLanguage, targetLanguage);
         if (cachedResult != null) {
             return Flux.just(cachedResult);
@@ -45,7 +44,7 @@ public class AICodeService {
             .retrieve()
             .bodyToFlux(String.class)
             .map(this::extractContent)
-            .doOnComplete(() -> cacheConversion(sourceCode, sourceLanguage, targetLanguage));
+            .doOnComplete(() -> cacheService.cacheConversion(sourceCode, sourceLanguage, targetLanguage, "convertedCode")); // Adjust as needed
     }
 
     private String buildSystemPrompt(String sourceLanguage, String targetLanguage) {
@@ -75,23 +74,12 @@ public class AICodeService {
     }
 
     public Mono<String> explainCode(String sourceCode, String language) {
-        String prompt = String.format(
-            "Explain this %s code concisely, focusing on its main functionality and key components:",
-            language
-        );
-
-        Map<String, Object> systemMessage = Map.of(
-            "role", "system",
-            "content", "You are an expert programmer providing concise code explanations."
-        );
-
-        Map<String, Object> userMessage = Map.of(
-            "role", "user",
-            "content", prompt + "\n\n" + sourceCode
-        );
-
+        String prompt = String.format("Explain this %s code concisely:", language);
         Map<String, Object> requestBody = Map.of(
-            "messages", List.of(systemMessage, userMessage),
+            "messages", List.of(
+                Map.of("role", "system", "content", "You are an expert programmer."),
+                Map.of("role", "user", "content", prompt + "\n\n" + sourceCode)
+            ),
             "model", "deepseek-r1-distill-llama-70b",
             "temperature", 0.7,
             "max_completion_tokens", 1000,

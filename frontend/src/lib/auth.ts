@@ -1,12 +1,12 @@
-import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 interface AuthState {
-  token: string | null
-  username: string | null
-  setAuth: (token: string, username: string) => void
-  clearAuth: () => void
-  isAuthenticated: () => boolean
+  token: string | null;
+  username: string | null;
+  setAuth: (token: string, username: string) => void;
+  clearAuth: () => void;
+  isAuthenticated: () => boolean;
 }
 
 export const useAuth = create<AuthState>()(
@@ -19,41 +19,45 @@ export const useAuth = create<AuthState>()(
       isAuthenticated: () => !!get().token,
     }),
     {
-      name: 'auth-storage',
+      name: "auth-storage",
     }
   )
-)
+);
 
 export const login = async (username: string, password: string) => {
-  const response = await fetch('http://localhost:8080/api/auth/login', {
-    method: 'POST',
+  const response = await fetch("http://localhost:8080/api/auth/login", {
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({ username, password }),
-  })
+  });
 
   if (!response.ok) {
-    throw new Error('Login failed')
+    throw new Error("Login failed");
   }
 
-  const data = await response.json()
-  useAuth.getState().setAuth(data.token, data.username)
-  return data
-}
+  const data = await response.json();
+  useAuth.getState().setAuth(data.token, data.username);
+  return data;
+};
 
-export const register = async (username: string, email: string, password: string) => {
-  const response = await fetch('http://localhost:8080/api/auth/register', {
-    method: 'POST',
+export const register = async (
+  username: string,
+  email: string,
+  password: string
+) => {
+  const response = await fetch("http://localhost:8080/api/auth/register", {
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({ username, email, password }),
-  })
+  });
 
   if (!response.ok) {
-    throw new Error('Registration failed')
+    throw new Error("Registration failed");
   }
 
-  return await response.json()
-}
+  return await response.json();
+};

@@ -1,41 +1,43 @@
 package com.codesphere.service;
 
-import com.codesphere.model.CollaborationMessage;
-import com.codesphere.model.CollaborationSession;
-import com.codesphere.model.User;
+import com.codesphere.model.*;
 import com.codesphere.repository.CollaborationSessionRepository;
 import com.codesphere.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.Set;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.Collections;
-import java.util.ArrayList;
 
 @Service
-@RequiredArgsConstructor
 public class CollaborationService {
     private final SimpMessagingTemplate messagingTemplate;
     private final CollaborationSessionRepository sessionRepository;
     private final UserRepository userRepository;
     private final Map<String, Set<String>> activeCollaborators = new ConcurrentHashMap<>();
 
+    public CollaborationService(SimpMessagingTemplate messagingTemplate,
+                                  CollaborationSessionRepository sessionRepository,
+                                  UserRepository userRepository) {
+        this.messagingTemplate = messagingTemplate;
+        this.sessionRepository = sessionRepository;
+        this.userRepository = userRepository;
+    }
+
     @Transactional
     public CollaborationSession createSession(String username) {
         User user = userRepository.findByUsername(username)
             .orElseThrow(() -> new RuntimeException("User not found"));
 
-        CollaborationSession session = new CollaborationSession();
-        session.setSessionId(UUID.randomUUID().toString());
-        session.setCreatedAt(LocalDateTime.now());
-        session.setLastModifiedAt(LocalDateTime.now());
+        CollaborationSession session = CollaborationSession.builder()
+            .sessionId(UUID.randomUUID().toString())
+            .createdAt(LocalDateTime.now())
+            .lastModifiedAt(LocalDateTime.now())
+            .participants(new ArrayList<>())
+            .activeUsers(new HashSet<>())
+            .build();
         session.getParticipants().add(user);
         session.getActiveUsers().add(username);
 
@@ -54,7 +56,6 @@ public class CollaborationService {
         session.getActiveUsers().add(username);
         sessionRepository.save(session);
 
-        // Notify other participants
         messagingTemplate.convertAndSend(
             "/topic/session/" + sessionId + "/users",
             session.getActiveUsers()
@@ -100,7 +101,6 @@ public class CollaborationService {
                 return;
         }
 
-        // Broadcast code changes to all participants
         messagingTemplate.convertAndSend(
             "/topic/session/" + message.getSessionId(),
             message
@@ -109,22 +109,6 @@ public class CollaborationService {
 
     public Optional<CollaborationSession> getSession(String sessionId) {
         return sessionRepository.findBySessionId(sessionId);
-    }
-
-    public void handleUserJoin(String sessionId, String username) {
-        activeCollaborators.computeIfAbsent(sessionId, k -> ConcurrentHashMap.newKeySet())
-            .add(username);
-        
-        broadcastCollaborators(sessionId);
-    }
-
-    public void handleUserLeave(String sessionId, String username) {
-        activeCollaborators.computeIfPresent(sessionId, (k, v) -> {
-            v.remove(username);
-            return v.isEmpty() ? null : v;
-        });
-        
-        broadcastCollaborators(sessionId);
     }
 
     public void broadcastCodeChange(String sessionId, String username, String code) {

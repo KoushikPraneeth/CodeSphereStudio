@@ -1,90 +1,83 @@
-import { useState, useEffect } from 'react'
-import { useEditorStore } from '@/lib/editor-store'
-import { Button } from './ui/button'
-import { Input } from './ui/input'
-import { 
+import { useState, useEffect } from "react";
+import { useEditorStore } from "@/lib/editor-store";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from './ui/dialog'
-import { 
-  File, 
-  FolderPlus, 
-  Save, 
-  Trash2,
-  Code,
-  FileText
-} from 'lucide-react'
+} from "./ui/dialog";
+import { File, FolderPlus, Save, Trash2, Code, FileText } from "lucide-react";
 
 interface ProjectFile {
-  id: number
-  name: string
-  content: string
-  language: string
-  lastModifiedAt: string
+  id: number;
+  name: string;
+  content: string;
+  language: string;
+  lastModifiedAt: string;
 }
 
 export function FileExplorer() {
-  const [files, setFiles] = useState<ProjectFile[]>([])
-  const [newFileName, setNewFileName] = useState('')
-  const { setCode, setLanguage } = useEditorStore()
+  const [files, setFiles] = useState<ProjectFile[]>([]);
+  const [newFileName, setNewFileName] = useState("");
+  const { setCode, setLanguage } = useEditorStore();
 
   const fetchFiles = async () => {
-    const response = await fetch('http://localhost:8080/api/files', {
+    const response = await fetch("http://localhost:8080/api/files", {
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      }
-    })
-    const data = await response.json()
-    setFiles(data)
-  }
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    });
+    const data = await response.json();
+    setFiles(data);
+  };
 
   useEffect(() => {
-    fetchFiles()
-  }, [])
+    fetchFiles();
+  }, []);
 
   const createFile = async () => {
-    if (!newFileName) return
+    if (!newFileName) return;
 
-    await fetch('http://localhost:8080/api/files', {
-      method: 'POST',
+    await fetch("http://localhost:8080/api/files", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
       body: JSON.stringify({
         name: newFileName,
-        content: '',
-        language: 'javascript'
-      })
-    })
+        content: "",
+        language: "javascript",
+      }),
+    });
 
-    setNewFileName('')
-    fetchFiles()
-  }
+    setNewFileName("");
+    fetchFiles();
+  };
 
   const openFile = async (fileId: number) => {
     const response = await fetch(`http://localhost:8080/api/files/${fileId}`, {
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      }
-    })
-    const file = await response.json()
-    setCode(file.content)
-    setLanguage(file.language)
-  }
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    });
+    const file = await response.json();
+    setCode(file.content);
+    setLanguage(file.language);
+  };
 
   const deleteFile = async (fileId: number) => {
     await fetch(`http://localhost:8080/api/files/${fileId}`, {
-      method: 'DELETE',
+      method: "DELETE",
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      }
-    })
-    fetchFiles()
-  }
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    });
+    fetchFiles();
+  };
 
   return (
     <div className="w-64 border-r h-full p-4">
@@ -137,5 +130,5 @@ export function FileExplorer() {
         ))}
       </div>
     </div>
-  )
+  );
 }

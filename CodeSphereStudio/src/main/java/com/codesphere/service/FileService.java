@@ -1,15 +1,25 @@
+package com.codesphere.service;
+
+import com.codesphere.model.User;
+import com.codesphere.model.UserFile;
+import com.codesphere.repository.UserFileRepository;
+import com.codesphere.repository.UserRepository;
+import com.codesphere.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import lombok.RequiredArgsConstructor;
+
 import java.util.List;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
+
 @Service
 @Transactional
-@RequiredArgsConstructor
 public class FileService {
     private final UserFileRepository fileRepository;
     private final UserRepository userRepository;
+
+    public FileService(UserFileRepository fileRepository, UserRepository userRepository) {
+        this.fileRepository = fileRepository;
+        this.userRepository = userRepository;
+    }
 
     public UserFile createFile(String username, String name, String content, String language) {
         User owner = userRepository.findByUsername(username)
@@ -34,7 +44,9 @@ public class FileService {
     }
 
     public List<UserFile> getUserFiles(String username) {
-        return fileRepository.findByOwnerUsername(username);
+        User user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        return fileRepository.findByOwnerId(user.getId());
     }
 
     public void deleteFile(Long fileId, String username) {
@@ -42,7 +54,7 @@ public class FileService {
             .orElseThrow(() -> new ResourceNotFoundException("File not found"));
         
         if (!file.getOwner().getUsername().equals(username)) {
-            throw new AccessDeniedException("Not authorized to delete this file");
+            throw new org.springframework.security.access.AccessDeniedException("Not authorized to delete this file");
         }
         
         fileRepository.delete(file);
