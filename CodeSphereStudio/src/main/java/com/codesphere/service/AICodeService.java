@@ -1,7 +1,6 @@
 package com.codesphere.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -14,11 +13,16 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-@RequiredArgsConstructor
 public class AICodeService {
     private final WebClient.Builder webClientBuilder;
     private final ObjectMapper objectMapper;
     private final ConversionCacheService cacheService;
+
+    public AICodeService(WebClient.Builder webClientBuilder, ObjectMapper objectMapper, ConversionCacheService cacheService) {
+        this.webClientBuilder = webClientBuilder;
+        this.objectMapper = objectMapper;
+        this.cacheService = cacheService;
+    }
 
     @Value("${ai.groq.api-key}")
     private String apiKey;
